@@ -15,7 +15,7 @@ local disk_drive = component.disk_drive
 
 -- dirs aka namespaces
 
-local root = '/home/banking/'
+local root = '/home/Morgana-banking/banking/'
 
 local dir = {
   clients = root..'clients/',
