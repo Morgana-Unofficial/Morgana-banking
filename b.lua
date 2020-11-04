@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '1.1.5'
+local version = '1.1.7'
 
 local component = require("component")
 local computer = require("computer")
@@ -435,7 +435,7 @@ function makeProfitCountFloppy(user)
   saveObject(floppy_path, 'operation', {operation = 'profitcount'})
   saveObject(floppy_path, user, users[user])
   log('shell.execute')
-  shell.execute('label -a '..floppy_id..' profit count for '..user)
+  shell.setAlias(floppy_id, ' profit count for '..user)
   log('shell.execute end')
 end
 
@@ -686,7 +686,7 @@ end
 
 function mainCycle() 
   while true do
-    print("Freemem: "..tostring( trunc(computer.freeMemory()/computer.totalMemory()) ).."%")
+    print("Freemem: "..tostring( trunc(computer.freeMemory()/computer.totalMemory()*100) ).."%")
     _, operator_nick, cmdkey = readFromDict('prog_options', "Выберите режим")
     if(cmdkey=="-" or cmdkey=="/") then
       os.exit()
