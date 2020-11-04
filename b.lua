@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '1.1.4'
+local version = '1.1.5'
 
 local component = require("component")
 local computer = require("computer")
@@ -11,9 +11,12 @@ local serialization = require("serialization")
 local unicode = require("unicode")
 
 -- component aliases 
-local prn = component.openprinter
-local data = component.data
-local disk_drive = component.disk_drive
+local prn = false
+pcall(function () prn = component.openprinter end)
+local data = false
+pcall(function () data = component.data end)
+local disk_drive = false
+pcall(function () disk_drive = component.disk_drive end)
 
 if(not prn) then
   print("Нет принтера")
@@ -49,6 +52,10 @@ local operator_nick = nil
 -------------------- COMMON --------------------
 
 function pt(ndict) for k,v in pairs(ndict) do print(k,v) end end
+
+function trunc(float)
+  return math.ceil(float*100)/100
+end
 
 function listKeys(ndict) 
   local res = ''
@@ -312,61 +319,6 @@ function printFooter(regdate, operator, fill_up_to)
   prn.writeln("§r§o"..operator)
 end
 
--------------------- VEXELS --------------------
-
-function getNewVexelID() 
-  local series = '01'
-  local res = readOneliner('vexel.last_id', 1)
-  writeOneliner('vexel.last_id', res+1)
-  
-  res = 'V'..series..string.format("%05d", res)
-  return res
-end
-
-function newVexel(value)
-  local id = getNewVexelID()
-  -- profit per day, percent of main value
-  local profit = 2.5
-
-  -- printer operation
-  local title = "§1Вексель #"..id..", ".. value .. " кон"
-  prn.setTitle("§r"..title)
-  --               123456789012345678901234567890
-  prn.writeln('§1§l              Вексель')
-  prn.writeln('§1§l        Первый Банк Шеола')
-  prn.writeln("§r§l               #"..id)
-  prn.writeln("")
-  prn.writeln(  '§rВыпущен '..getDate())
-  prn.writeln(  '§rНоминал: '..value.." кон")
-  prn.writeln(  '§rДоходность: '..tostring(value*profit/100).." кон в день")
-  prn.writeln("")
-  prn.writeln('§r§oНа предъявителя§r')
-  prn.writeln("")
-  prn.print()
-  
-  local vexelObj = {
-    id = id,
-    value = value,
-    profit = profit,
-    regdate = getDate(),
-    cash_dates = {}    
-  }
-  
-  if(objectExists(dir.vexels, id)) then
-    -- WHOOPSIE
-    print('Vexel '..id..' already exists, abort!')
-    return nil
-  end
-  
-  saveVexel(vexelObj)
-  
-  return vexelObj
-end
-
-function saveVexel(vexelObj)
-  saveObject(dir.vexels, vexelObj.id, vexelObj)
-end
-
 -------------------- USERS --------------------
 --it should be more like transaction-based - disk IO is slooow
 
@@ -576,7 +528,7 @@ function newDeposit()
 end
 
 function newDepositRaw(owner, deposit_plan, currency_type, currency_amount)
-  local id = getNewDepositID()
+  local id = getNewDepositID(currency_type)
   
   local profit_period, profit_size, deposit_length
   profit_size, deposit_length, t = table.unpack(splitBySymbol(deposit_plan, ","))
@@ -590,7 +542,7 @@ function newDepositRaw(owner, deposit_plan, currency_type, currency_amount)
   local profit = ''
   
   if(profit_period == " ежемесячно") then
-    profit = math.ceil(profit_size*100/30)/100
+    profit = trunc(profit_size/30)
   elseif(profit_period == " ежедневно") then
     profit = profit_size
   end
@@ -624,18 +576,18 @@ function printDeposit(obj)
   prn.writeln("")
   prn.writeln(  'Владелец: '..obj.owner)
   prn.writeln(  '§rСумма: '..obj.amount.." кон")
+  -- prn.writeln(  '§rПроцент: '..obj.profit.."% в день")
   prn.writeln(  '§rКонечная сумма: '..tostring(obj.amount+obj.amount*obj.profit/100*obj.length).." кон")
   prn.writeln(  '§rСрок: '..obj.length.." дней")
   printFooter(obj.regdate, obj.operator, 12)
   prn.print()
 end
 
-function getNewDepositID() 
-  local series = '01'
+function getNewDepositID(ncurrency_type) 
   local res = readOneliner('deposit.last_id', 1)
   writeOneliner('deposit.last_id', res+1)
   
-  res = 'D'..series..string.format("%05d", res)
+  res = 'D'..string.format("%02d", ncurrency_type)..string.format("%05d", res)
   return res
 end
 
@@ -643,6 +595,63 @@ function saveDeposit(obj)
   saveObject(dir.deposits, obj.id, obj)
 end
 -------------------- CREDITS --------------------
+
+
+-------------------- VEXELS --------------------
+
+function getNewVexelID() 
+  local series = '01'
+  local res = readOneliner('vexel.last_id', 1)
+  writeOneliner('vexel.last_id', res+1)
+  
+  res = 'V'..series..string.format("%05d", res)
+  return res
+end
+
+function newVexel(value)
+  local id = getNewVexelID()
+  -- profit per day, percent of main value
+  local profit = 2.5
+
+  -- printer operation
+  local title = "§1Вексель #"..id..", ".. value .. " кон"
+  prn.setTitle("§r"..title)
+  --               123456789012345678901234567890
+  prn.writeln('§1§l              Вексель')
+  prn.writeln('§1§l        Первый Банк Шеола')
+  prn.writeln("§r§l               #"..id)
+  prn.writeln("")
+  prn.writeln(  '§rВыпущен '..getDate())
+  prn.writeln(  '§rНоминал: '..value.." кон")
+  prn.writeln(  '§rДоходность: '..tostring(value*profit/100).." кон в день")
+  prn.writeln("")
+  prn.writeln('§r§oНа предъявителя§r')
+  prn.writeln("")
+  prn.print()
+  
+  local vexelObj = {
+    id = id,
+    value = value,
+    profit = profit,
+    regdate = getDate(),
+    cash_dates = {}    
+  }
+  
+  if(objectExists(dir.vexels, id)) then
+    -- WHOOPSIE
+    print('Vexel '..id..' already exists, abort!')
+    return nil
+  end
+  
+  saveVexel(vexelObj)
+  
+  return vexelObj
+end
+
+function saveVexel(vexelObj)
+  saveObject(dir.vexels, vexelObj.id, vexelObj)
+end
+
 -------------------- _ --------------------
 createOrderedDict('prog_options', {
   ["-"] = "Выход"
@@ -677,6 +686,7 @@ end
 
 function mainCycle() 
   while true do
+    print("Freemem: "..tostring( trunc(computer.freeMemory()/computer.totalMemory()) ).."%")
     _, operator_nick, cmdkey = readFromDict('prog_options', "Выберите режим")
     if(cmdkey=="-" or cmdkey=="/") then
       os.exit()
