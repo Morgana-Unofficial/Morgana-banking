@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '1.1.0'
+local version = '1.1.4'
 
 local component = require("component")
 local computer = require("computer")
@@ -34,7 +34,7 @@ local root = '/home/Morgana-banking/banking/'
 local dir = {
   clients = root..'clients/'
   , accounts = root..'accounts/'
-  , debets = root..'debets/'
+  , deposits = root..'deposits/'
   , credits = root..'credits/'
   , vexels = root..'vexels/'
 }
@@ -66,7 +66,7 @@ end
 function splitBySymbol(nstr, nchar)
   local res={}
   local t="_"
-  local cnt=0
+  local cnt=1
   while (true) do
     t=""
     for i = 1, unicode.len(nstr) do 
@@ -180,6 +180,13 @@ function readStr(prompt, default)
   end
 end
 
+function getNickFromMotion()
+  print("Пожалуйста, совершите любое движение или прыжок.")
+  local _, _, nx, ny, nz, nNick = event.pull(60, "motion")
+  print("Считано: "..nNick)
+  return nNick
+end
+
 function getNickFromInput(nprompt)
   if(nprompt ~= nil) then
     print(nprompt)
@@ -188,12 +195,14 @@ function getNickFromInput(nprompt)
   end
   local tNick = nil
   _, _, _, _, tNick = event.pull("key_up")
+  print("Считано: "..tNick)
   return tNick
 end
 
 function getOperatorNick()
-  operator_nick = getNickFromInput("Нажмите \"Ввод\", чтобы подтвердить операцию")
-  print("Биометрия получена")
+  if(not operator_nick) then
+    operator_nick = getNickFromInput("Нажмите \"Ввод\", чтобы подтвердить операцию")
+  end
   return operator_nick
 end
 
@@ -290,6 +299,19 @@ function loadObject(dir, filename)
   return res
 end
 
+-------------------- ____ --------------------
+
+function printFooter(regdate, operator, fill_up_to)
+  --remember: 20 lines
+  for i = 1, (fill_up_to-4) do 
+    prn.writeln("")
+  end
+  prn.writeln('Зарегистрирован:')
+  prn.writeln("§r§o"..regdate)
+  prn.writeln('Ответственный оператор:')
+  prn.writeln("§r§o"..operator)
+end
+
 -------------------- VEXELS --------------------
 
 function getNewVexelID() 
@@ -311,8 +333,8 @@ function newVexel(value)
   prn.setTitle("§r"..title)
   --               123456789012345678901234567890
   prn.writeln('§1§l              Вексель')
-  prn.writeln('§1§l        Первого Банка Морганы')
-  prn.writeln("§r§8               #"..id)
+  prn.writeln('§1§l        Первый Банк Шеола')
+  prn.writeln("§r§l               #"..id)
   prn.writeln("")
   prn.writeln(  '§rВыпущен '..getDate())
   prn.writeln(  '§rНоминал: '..value.." кон")
@@ -327,7 +349,7 @@ function newVexel(value)
     value = value,
     profit = profit,
     regdate = getDate(),
-    cashed = {}    
+    cash_dates = {}    
   }
   
   if(objectExists(dir.vexels, id)) then
@@ -348,12 +370,16 @@ end
 -------------------- USERS --------------------
 --it should be more like transaction-based - disk IO is slooow
 
-function newUser()
-  local user = newUserRaw(readStr("Имя пользователя"))
-  addAccountToUser(user, consts.acc_types.deposit, consts.currency_types.main)
+function newUser(username)
+  local user
+  if(not username) then
+    user = newUserRaw(readStr("Имя пользователя"))
+  else
+    user = newUserRaw(username)
+  end
+  addAccountToUser(user, consts.acc_types.debit, consts.currency_types.main)
   printUser(user)
   print("Пользователь создан, удостоверение отпечатано!")
-
 
   saveObject(dir.clients, user.name, user)
 end
@@ -372,18 +398,22 @@ function newUserRaw(username)
     vexels = {}
   }
   
+  users[username] = user
+  
   saveObject(dir.clients, username, user)
   return user
 end
 
 function loadUser(username, isForce)
+  --isForce for forced update
   if(users[username] and not isForce) then
     return users[username]
   end 
   
   local user = loadObject(dir.clients, username)
   if(not user) then
-    user = newUserRaw(username)
+    print("Пользователь не найден в базе! Создание нового...")
+    user = newUser(username)
   end
   users[username] = user
   return user
@@ -408,7 +438,7 @@ function printUser(userObj)
   prn.setTitle("§r"..title)
   --               123456789012345678901234567890
   prn.writeln('§1§l       Удостоверение клиента')
-  prn.writeln("§r§8               #"..userObj.id)
+  prn.writeln("§r§l            #"..userObj.id)
   prn.writeln("")
   prn.writeln('Настоящим заверяется, что')
   prn.writeln("§r§o"..userObj.name)
@@ -417,16 +447,7 @@ function printUser(userObj)
   prn.writeln("")
   prn.writeln("Номера связанных счетов:")
   prn.writeln("§r§o"..listKeys(userObj.accounts))
-  prn.writeln("")
-  prn.writeln("")
-  prn.writeln("")
-  prn.writeln("")
-  prn.writeln("")
-  prn.writeln("")
-  prn.writeln('Зарегистрирован:')
-  prn.writeln("§r§o"..userObj.regdate)
-  prn.writeln('Ответственный оператор:')
-  prn.writeln("§r§o"..userObj.operator)
+  printFooter(userObj.regdate, userObj.operator, 10)
   prn.print()
 end
 
@@ -482,12 +503,13 @@ createOrderedDict("owner_types", {
   ['К']={'компания', 'company'}
 })
 
+-- тип банковского счёта
 createOrderedDict('acc_types', {
-  ['Д']={'дебет', "deposit"},
-  ['К']={'кредит', "credit"},
+  ['Д']={'дебетовый', "debit"},
+  ['К']={'кредитный', "credit"},
+  ['В']={'вклад', "deposit"},
   ['Э']={'эскроу', "escrow"}
 })
-
 
 createOrderedDict('currency_types', {
   ['1']={'главная',"main"},
@@ -537,12 +559,96 @@ function getNewAccountID(nacc_type, nowner_type, ncurrency_type)
   res = "A"..nacc_type..nowner_type..ncurrency_type..string.format("%05d", res)
   return res
 end
--------------------- CREDITS --------------------
+
 -------------------- DEPOSITS --------------------
+createOrderedDict('deposit_plans', {
+  ["30"] = "30% ежемесячно, 30 дней",
+})
+
+function newDeposit()
+  current_user = getNickFromMotion()
+  loadUser(current_user)
+  local deposit_plan = readFromDict('deposit_plans', "Пожалуйста, выберите вклад", '30')
+  local deposit_size = tonumber(readStr("Введите сумму вклада", "1"))
+  local deposit = newDepositRaw(current_user, deposit_plan, consts.currency_types.main, deposit_size)
+  printDeposit(deposit)
+  print("Вклад внесён")
+end
+
+function newDepositRaw(owner, deposit_plan, currency_type, currency_amount)
+  local id = getNewDepositID()
+  
+  local profit_period, profit_size, deposit_length
+  profit_size, deposit_length, t = table.unpack(splitBySymbol(deposit_plan, ","))
+  
+  deposit_length = tonumber(string.sub(deposit_length, 1, 4))
+  
+  profit_size, profit_period = table.unpack(splitBySymbol(profit_size, "%"))
+  profit_size = tonumber(profit_size)
+  
+  -- profit per day, percent of main value
+  local profit = ''
+  
+  if(profit_period == " ежемесячно") then
+    profit = math.ceil(profit_size*100/30)/100
+  elseif(profit_period == " ежедневно") then
+    profit = profit_size
+  end
+  
+  local obj = {
+    id = id,
+    owner = owner,
+    profit = profit,
+    length = deposit_length, 
+    currency_type = currency_type, 
+    amount = currency_amount, 
+    regdate = getDate(),
+    operator = getOperatorNick(),
+    cash_dates = {}    
+  }
+  
+  -- FIXME add money accounting!
+  saveDeposit(obj)
+  
+  return obj
+end
+
+function printDeposit(obj)
+  -- printer operation
+  local title = "§1Вклад #"..obj.id..", на ".. obj.length .. " дней"
+  prn.setTitle("§r"..title)
+  --               123456789012345678901234567890
+  prn.writeln('§1§lВклад')
+  prn.writeln("§r§l#"..obj.id)
+  prn.writeln('§1§lПервый Банк Шеола')
+  prn.writeln("")
+  prn.writeln(  'Владелец: '..obj.owner)
+  prn.writeln(  '§rСумма: '..obj.amount.." кон")
+  prn.writeln(  '§rКонечная сумма: '..tostring(obj.amount+obj.amount*obj.profit/100*obj.length).." кон")
+  prn.writeln(  '§rСрок: '..obj.length.." дней")
+  printFooter(obj.regdate, obj.operator, 12)
+  prn.print()
+end
+
+function getNewDepositID() 
+  local series = '01'
+  local res = readOneliner('deposit.last_id', 1)
+  writeOneliner('deposit.last_id', res+1)
+  
+  res = 'D'..series..string.format("%05d", res)
+  return res
+end
+
+function saveDeposit(obj)
+  saveObject(dir.deposits, obj.id, obj)
+end
+-------------------- CREDITS --------------------
 -------------------- _ --------------------
 createOrderedDict('prog_options', {
   ["-"] = "Выход"
   , ["П"] = "Регистрация пользователя"
+  -- , ["С+"] = "Внести деньги на счёт"
+  , ["В"] = "Открыть вклад"
   -- , ["Э"] = "Эмитировать (отпечатать) вексели Банка"
   -- , ["%s"] = "Сохранить на дискету"
 })
@@ -550,7 +656,7 @@ createOrderedDict('prog_options', {
 -------------------- MAIN --------------------
 
 function Init() 
-
+  
   if(not fs.exists(root)) then
     fs.makeDirectory(root)
   end
@@ -561,7 +667,8 @@ function Init()
     end
   end
 
-  -- term.clear()
+  term.clear()
+  print('АРМ "Банк", вер.'..version)
 end
 
 function showHelp() 
@@ -575,25 +682,31 @@ function mainCycle()
       os.exit()
     elseif(cmdkey=="П") then
       newUser() 
+    elseif(cmdkey=="В") then
+      newDeposit() 
     else
       showHelp()
     end
+    operator_nick = nil
+    current_user = nil
   end
 end
 
 -- "предъявлено к снятию процентов"
 Init()
-mainCycle() 
 
 --[[
+]]--
 while(true) do
   local _, res = pcall(mainCycle)
   if(type(res)~="string") then
     os.exit()
   end  
   print(res)
+  --flushing openprinter buffer just in case
+  prn.print()
 end
-]]--
+
 
 --[[
 loadUser('Test')
