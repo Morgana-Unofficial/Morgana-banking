@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.10'
+local version = '2.0.11'
 
 local require_raw, require_
 -- local component
@@ -908,7 +908,11 @@ end
 
 function mainCycle() 
   local free_mem = tostring( trunc(computer.freeMemory()/computer.totalMemory()*100) )
-  print("Freemem: "..free_mem.."%")
+  print("Free mem : "..free_mem.."%")
+  local free_disk = (component.filesystem.spaceTotal()-component.filesystem.spaceUsed())
+  free_disk = free_disk / component.filesystem.spaceTotal()
+  free_disk = tostring( trunc(free_disk*100) )
+  print("Free disk: "..free_disk.."%")
   while true do
     print('================================================')
     _, operator_nick, cmdkey = readFromDict('prog_options', "Выберите режим")
