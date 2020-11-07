@@ -835,7 +835,7 @@ function update_from_internet()
       return false
     end
     
-    io.write("Обновление выполнено")
+    print("Обновление выполнено")
     fs_close(FILE)
     
     if(readPlusMinus("Перезагрузиться?")) then
