@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.6'
+local version = '2.0.7'
 
 local require_raw, require_
 -- local component
@@ -901,9 +901,9 @@ function showHelp()
 end
 
 function mainCycle() 
+  local free_mem = tostring( trunc(computer.freeMemory()/computer.totalMemory()*100) )
+  print("Freemem: "..free_mem.."%")
   while true do
-    local free_mem = tostring( trunc(computer.freeMemory()/computer.totalMemory()*100) )
-    print("Freemem: "..free_mem.."%")
     _, operator_nick, cmdkey = readFromDict('prog_options', "Выберите режим")
     if(cmdkey=="-" or cmdkey=="/") then
       os.exit()
