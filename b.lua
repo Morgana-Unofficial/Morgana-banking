@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.14'
+local version = '2.1.0'
 
 local require_raw, require_
 -- local component
@@ -90,6 +90,15 @@ end
 
 function pause() 
   event.pull(99, "key_down")
+end
+
+function switch(list, case)
+  local arg = list[case]
+  if(type(arg) == "function") then
+    return arg
+  else
+    return _G[arg] or _G[list["default"]]
+  end
 end
 
 function readLiskelStr()
@@ -872,16 +881,6 @@ function update_from_internet()
   end
 end
 
--------------------- _ --------------------
-createOrderedDict('prog_options', {
-  ["-"] = "Выход"
-  , ["П"] = "Регистрация пользователя"
-  , ["+"] = "Загрузить обновления для программы"
-  -- , ["С+"] = "Внести деньги на счёт"
-  , ["В"] = "Открыть вклад"
-  -- , ["Э"] = "Эмитировать (отпечатать) вексели Банка"
-  -- , ["%s"] = "Сохранить на дискету"
-})
 
 -------------------- MAIN --------------------
 
@@ -924,21 +923,31 @@ function showHelp()
   pt(dicts.ordered['prog_options'])
 end
 
+-------------------- _ --------------------
+createOrderedDict('prog_options', {
+  ["-"] = "Выход"
+  , ["П"] = "Регистрация пользователя"
+  , ["+"] = "Загрузить обновления для программы"
+  -- , ["С+"] = "Внести деньги на счёт"
+  , ["В"] = "Открыть вклад"
+  -- , ["Э"] = "Эмитировать (отпечатать) вексели Банка"
+  -- , ["%s"] = "Сохранить на дискету"
+})
+
+local cmd_switch = {
+  ["+"] = update_from_internet, 
+  ["-"] = os.exit,
+  ["/"] = os.exit,
+  ["П"] = newUser, 
+  ["В"] = newDeposit, 
+  ["default"] = showHelp
+}
+
 function mainCycle() 
   while true do
     print('================================================')
     _, operator_nick, cmdkey = readFromDict('prog_options', "Выберите режим")
-    if(cmdkey=="-" or cmdkey=="/") then
-      os.exit()
-    elseif(cmdkey=="П") then
-      newUser() 
-    elseif(cmdkey=="В") then
-      newDeposit() 
-    elseif(cmdkey=="+") then
-      update_from_internet() 
-    else
-      showHelp()
-    end
+    switch(cmd_switch, cmdkey)()
     operator_nick = nil
     current_user = nil
   end
