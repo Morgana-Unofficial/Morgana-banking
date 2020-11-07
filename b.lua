@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '1.1.7'
+local version = '2.0.0'
 
 local require_raw, require_
 -- local component
@@ -18,6 +18,7 @@ if(isLiskelOS) then
   f.makeDirectory = f.mkdir
   f.exists = component.filesystem.exists
   fs = f
+  os.exit = computer.shutdown
 else 
   -- OpenOS
   read = io.read
@@ -435,6 +436,38 @@ function printFooter(regdate, operator, fill_up_to)
   prn.writeln("§r§o"..operator)
 end
 
+function do_print()
+  local fail = true
+  while fail do
+    local paper = prn.getPaperLevel()
+    local color_ink = prn.getColorInkLevel() 
+    local black_ink = prn.getBlackInkLevel()
+    
+    fail = false
+  
+    if(paper == 0 or paper == false) then
+      print("Не могу печатать: кончилась бумага")
+      fail = true
+      pause()
+    end
+    
+    if(color_ink == 0 or color_ink == false) then
+      print("Не могу печатать: нет цветных чернил")
+      fail = true
+      pause()
+    end
+    
+    if(black_ink == 0 or black_ink == false) then
+      print("Не могу печатать: нет чёрных чернил")
+      fail = true
+      pause()
+    end
+    
+  end
+  
+  prn.print()
+end
+
 -------------------- USERS --------------------
 --it should be more like transaction-based - disk IO is slooow
 
@@ -517,7 +550,7 @@ function printUser(userObj)
   prn.writeln("Номера связанных счетов:")
   prn.writeln("§r§o"..listKeys(userObj.accounts))
   printFooter(userObj.regdate, userObj.operator, 10)
-  prn.print()
+  do_print()
 end
 
 function addAccountToUser(userObj, acc_type, currency_type)
@@ -697,7 +730,7 @@ function printDeposit(obj)
   prn.writeln(  '§rКонечная сумма: '..tostring(obj.amount+obj.amount*obj.profit/100*obj.length).." кон")
   prn.writeln(  '§rСрок: '..obj.length.." дней")
   printFooter(obj.regdate, obj.operator, 12)
-  prn.print()
+  do_print()
 end
 
 function getNewDepositID(ncurrency_type) 
@@ -744,7 +777,7 @@ function newVexel(value)
   prn.writeln("")
   prn.writeln('§r§oНа предъявителя§r')
   prn.writeln("")
-  prn.print()
+  do_print()
   
   local vexelObj = {
     id = id,
@@ -804,7 +837,8 @@ end
 
 function mainCycle() 
   while true do
-    print("Freemem: "..tostring( trunc(computer.freeMemory()/computer.totalMemory()*100) ).."%")
+    local free_mem = tostring( trunc(computer.freeMemory()/computer.totalMemory()*100) )
+    print("Freemem: "..free_mem.."%")
     _, operator_nick, cmdkey = readFromDict('prog_options', "Выберите режим")
     if(cmdkey=="-" or cmdkey=="/") then
       os.exit()
