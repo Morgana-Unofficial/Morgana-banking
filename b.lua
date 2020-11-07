@@ -899,7 +899,13 @@ function Init()
   -- term.clear()
   print('================================================')
   print('АРМ "Банк", вер.'..version)
-  
+
+  local free_mem = tostring( trunc(computer.freeMemory()/computer.totalMemory()*100) )
+  print("Free mem : "..free_mem.."%")
+  local free_disk = (component.filesystem.spaceTotal()-component.filesystem.spaceUsed())
+  free_disk = free_disk / component.filesystem.spaceTotal()
+  free_disk = tostring( trunc(free_disk*100) )
+  print("Free disk: "..free_disk.."%")
 end
 
 function showHelp() 
@@ -907,12 +913,6 @@ function showHelp()
 end
 
 function mainCycle() 
-  local free_mem = tostring( trunc(computer.freeMemory()/computer.totalMemory()*100) )
-  print("Free mem : "..free_mem.."%")
-  local free_disk = (component.filesystem.spaceTotal()-component.filesystem.spaceUsed())
-  free_disk = free_disk / component.filesystem.spaceTotal()
-  free_disk = tostring( trunc(free_disk*100) )
-  print("Free disk: "..free_disk.."%")
   while true do
     print('================================================')
     _, operator_nick, cmdkey = readFromDict('prog_options', "Выберите режим")
