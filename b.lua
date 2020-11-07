@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.7'
+local version = '2.0.8'
 
 local require_raw, require_
 -- local component
@@ -114,6 +114,8 @@ function readLiskelStr()
           inp.DelChar()
           hist.ResetRecall()
         end
+      elseif evt[4] == 46 and evt[3] == 3 then -- Ctrl+C
+        return nil
       -- elseif evt[4] == 203 then -- left key
         -- inp.MovePos(-1)
       -- elseif evt[4] == 205 then --  right key
@@ -893,6 +895,7 @@ function Init()
 
   -- FIXME clear it one way or other!
   -- term.clear()
+  print('================================================')
   print('АРМ "Банк", вер.'..version)
 end
 
@@ -904,6 +907,7 @@ function mainCycle()
   local free_mem = tostring( trunc(computer.freeMemory()/computer.totalMemory()*100) )
   print("Freemem: "..free_mem.."%")
   while true do
+    print('================================================')
     _, operator_nick, cmdkey = readFromDict('prog_options', "Выберите режим")
     if(cmdkey=="-" or cmdkey=="/") then
       os.exit()
@@ -931,7 +935,6 @@ while(true) do
   if(type(res)~="string") then
     os.exit()
   end  
-  print(res)
   --flushing openprinter buffer just in case
   prn.clear()
 end
