@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.12'
+local version = '2.0.13'
 
 local require_raw, require_
 -- local component
@@ -18,7 +18,11 @@ if(isLiskelOS) then
   f.makeDirectory = f.mkdir
   f.exists = component.filesystem.exists
   fs = f
-  os.exit = computer.shutdown
+  os.exit = function () 
+    beep(500, 0.08)
+    beep(400, 0.16)
+    computer.shutdown()
+  end
 else 
   -- OpenOS
   read = io.read
@@ -893,8 +897,8 @@ function Init()
     end
   end
 
-  beep(500)
-  beep(800,0.2)
+  beep(500, 0.08)
+  beep(800, 0.16)
   -- FIXME clear it one way or other!
   -- term.clear()
   print('================================================')
