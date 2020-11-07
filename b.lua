@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.9'
+local version = '2.0.10'
 
 local require_raw, require_
 -- local component
@@ -894,9 +894,7 @@ function Init()
   end
 
   beep(500)
-  beep(700)
-  beep(600)
-  beep(800, 0.3)
+  beep(800,0.2)
   -- FIXME clear it one way or other!
   -- term.clear()
   print('================================================')
