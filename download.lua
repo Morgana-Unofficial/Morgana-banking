@@ -2,10 +2,11 @@ local shell = require("shell")
 local strs_bank = {
   'echo "f.run(\'b\')" > autorun.lua',
   'wget -f -q https://raw.githubusercontent.com/RollingHog/Morgana-banking/main/b.lua b.lua',
+  'wget -f -q https://raw.githubusercontent.com/RollingHog/Morgana-banking/main/download.lua download.lua',
   'wget -f -q https://raw.githubusercontent.com/RollingHog/LiskelOS/master/src/liskel2c.lua init.lua',
   'mkdir lib',
   'wget -f -q https://raw.githubusercontent.com/MightyPirates/OpenComputers/master-MC1.7.10/src/main/resources/assets/opencomputers/loot/openos/lib/serialization.lua lib/serialization.lua',
-  'wget -f -q https://raw.githubusercontent.com/RollingHog/Morgana-banking/main/lib/internet.lua lib/internet.lua'
+  'wget -f -q https://raw.githubusercontent.com/RollingHog/Morgana-banking/main/lib/internet.lua lib/internet.lua',
   'wget -f -q https://raw.githubusercontent.com/RollingHog/Morgana-banking/main/lib/event.lua lib/event.lua'
 }
 
