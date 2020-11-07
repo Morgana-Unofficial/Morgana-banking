@@ -805,6 +805,11 @@ end
 -------------------- SELF-UPDATE --------------------
 
 function update_from_internet()
+
+  if(isLiskelOS) then
+    print("Недоступно для LiskelOS")
+  end
+
   local url = "https://raw.githubusercontent.com/RollingHog/Morgana-banking/main/b.lua"
 
   -- it may be liskelOS
@@ -817,7 +822,7 @@ function update_from_internet()
   
   print('updating: '..dest_file)
   
-  local inet = component.getPrimary('internet')
+  local inet = require_('internet')
   if(inet == nil) then
     print('Недоступна интернет-карта')
     return false
@@ -829,6 +834,7 @@ function update_from_internet()
   if result then
     local result, reason = pcall(function()
       for chunk in response do
+        print(chunk)
         fs_write(FILE, chunk)
       end
     end)
