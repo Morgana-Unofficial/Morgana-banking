@@ -95,7 +95,7 @@ end
 
 function log(text)
   -- os.clock()
-  -- print(string.format("%.3f", computer.uptime()), text)
+  -- print(string.format("%.3f", computer.uptime()).." "..text)
 end
 
 function splitBySymbol(nstr, nchar)
