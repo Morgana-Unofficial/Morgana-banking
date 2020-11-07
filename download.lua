@@ -13,7 +13,7 @@ local strs_bank = {
 local root = string.sub(computer.getBootAddress(), 1, 3)
 print("avaliable mounts are: ")
 shell.execute('ls -l /mnt')
-print("your root is "..root)
+print("yours: "..root)
 print("enter one of the mounts, better not root")
 local target = io.read()
 target = "/mnt/"..target
