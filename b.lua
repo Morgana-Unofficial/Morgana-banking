@@ -2,10 +2,10 @@
 local version = '1.1.7'
 
 local require_raw, require_
-local component
-    , computer
-    , unicode
-    , fs
+-- local component
+    -- , computer
+    -- , unicode
+    -- , fs = {}
 
 if(_osname == 'Liskel OS') then
   require_ = function(s) return f.run('/lib/'..s) end
@@ -62,6 +62,14 @@ local current_user = nil
 
 local operator_nick = nil
 -------------------- COMMON --------------------
+
+function beep(freq)
+  computer.beep(freq)
+end
+
+function pause() 
+  event.pull(99, "key_down")
+end
 
 function pt(ndict) for k,v in pairs(ndict) do print(k,v) end end
 
