@@ -80,6 +80,53 @@ function pause()
   event.pull(99, "key_down")
 end
 
+function readLiskelStr()
+  local w, h = g.getResolution()
+  -- console init
+  local console_header = " "
+  local blinkon = true
+  local hist = console.history
+  local inp = console.input
+  print = console.print
+  console.lineout(console_header, h)
+  inp.SetPrintOffset(#console_header + 1)
+  -- console loop start
+  while true do
+    local evt = table.pack(computer.pullSignal(0.4))
+    if evt[1] == 'key_down' then
+      -- command
+      if evt[4] == 28 then -- enter key
+        local t = tostring(inp.GetString())
+        hist.AddInp(t) -- add input to history
+        inp.Clear() 
+        return t
+      elseif evt[4] == 14 then -- backspace
+        if inp.col > 1 then
+          inp.MovePos(-1)
+          inp.DelChar()
+          hist.ResetRecall()
+        end
+      -- elseif evt[4] == 203 then -- left key
+        -- inp.MovePos(-1)
+      -- elseif evt[4] == 205 then --  right key
+        -- inp.MovePos(1)
+      -- elseif evt[4] == 199 then -- home
+        -- inp.MovePos(-99999)
+      -- elseif evt[4] == 207 then -- end
+        -- inp.MovePos(99999)
+      elseif evt[4] ~= 0 then -- printable keys
+        local char = unicode.char(evt[3])
+        inp.Insert(char)
+        inp.MovePos(1)
+      end
+    end
+  end
+end
+
+if(isLiskelOS) then
+  read = readLiskelStr
+end
+
 function pt(ndict) for k,v in pairs(ndict) do print(k,v) end end
 
 function trunc(float)
