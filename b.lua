@@ -9,6 +9,9 @@ local require_raw, require_
 
 if(_osname == 'Liskel OS') then
   require_ = function(s) return f.run('/lib/'..s) end
+  print = console.print
+  f.makeDirectory = f.mkdir
+  f.exists = component.filesystem.exists
   fs = f
 else 
   -- OpenOS
