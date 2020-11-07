@@ -782,7 +782,7 @@ while(true) do
   end  
   print(res)
   --flushing openprinter buffer just in case
-  prn.print()
+  prn.clear()
 end
 
 
