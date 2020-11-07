@@ -7,7 +7,12 @@ local require_raw, require_
     -- , unicode
     -- , fs = {}
 
+local isLiskelOS = false
 if(_osname == 'Liskel OS') then
+  isLiskelOS = true
+end
+
+if(isLiskelOS) then
   require_ = function(s) return f.run('/lib/'..s) end
   print = console.print
   f.makeDirectory = f.mkdir
