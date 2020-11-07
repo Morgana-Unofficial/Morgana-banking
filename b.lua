@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.4'
+local version = '2.0.5'
 
 local require_raw, require_
 -- local component
@@ -31,6 +31,7 @@ end
 
 local event = require_("event")
 local serialization = require_("serialization")
+local inet = require_('internet')
 
 -- component aliases 
 local prn = false
@@ -50,6 +51,12 @@ end
 
 if(not disk_drive) then
   print("Нет дисковода")
+end
+
+local inet_test = false
+pcall(function () inet_test = component.internet end)
+if(not inet_test) then
+  print("Нет интернет-карты")
 end
 
 -- dirs aka namespaces
@@ -818,7 +825,6 @@ function update_from_internet()
   
   print('updating: '..dest_file)
   
-  local inet = require_('internet')
   if(inet == nil) then
     print('Недоступна интернет-карта')
     return false
