@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.11'
+local version = '2.0.12'
 
 local require_raw, require_
 -- local component
@@ -906,6 +906,13 @@ function Init()
   free_disk = free_disk / component.filesystem.spaceTotal()
   free_disk = tostring( trunc(free_disk*100) )
   print("Free disk: "..free_disk.."%")
+  print("LiskelOS: "..tostring(isLiskelOS))
+  
+  if (tonumber(free_disk) < 5) then
+    print("На диске слишком мало свободного места, очистите диск")
+    pause()
+    os.exit()
+  end
 end
 
 function showHelp() 
