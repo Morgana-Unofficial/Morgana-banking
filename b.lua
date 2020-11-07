@@ -247,7 +247,7 @@ end
 
 function fs_open (fn, mode)
   if(isLiskelOS) then
-    return fs.open(fn, mode)
+    return component.filesystem.open(fn, mode)
   else
     return io.open(fn, mode)
   end
@@ -255,22 +255,25 @@ end
 
 function fs_read(fn)
   if(isLiskelOS) then
-    return fs.readfile(fn)
+    return component.filesystem.read(fn, math.huge)
   else
     return fn:read()
   end
 end
 
 function fs_write(fn, data)
+  data = tostring(data)
   if(isLiskelOS) then
-    return fs.write(fn, data)
+    return component.filesystem.write(fn, data)
   else
     return fn:write(data)
   end
 end
 
 function fs_close(fn)
-  if(not isLiskelOS) then
+  if(isLiskelOS) then
+    component.filesystem.close(fn)
+  else
     fn:close()
   end
 end
