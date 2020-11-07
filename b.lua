@@ -127,18 +127,18 @@ function readOneliner(filename, default)
   if(not fs.exists(fn)) then
     writeOneliner(filename, default)
   end
-  local file = io.open(fn, "r")
-  local res = file:read(40)
-  file:close()
+  local file = fs_open(fn, "r")
+  local res = fs_read(file)
+  fs_close(file)
   log('readOneliner '..filename..' done')
   return res
 end
 
 function writeOneliner(filename, nData)
   local fn = root..filename
-  local file = io.open(fn, "w")
-  file:write(nData)
-  file:close() 
+  local file = fs_open(fn, "w")
+  fs_write(file, nData)
+  fs_close(file) 
 end
 
 function getFloppyPath()
@@ -241,6 +241,38 @@ function getOperatorNick()
   return operator_nick
 end
 
+--------------------  LISKELOS FILE IO --------------------
+
+function fs_open (fn, mode)
+  if(isLiskelOS) then
+    return fs.open(fn, mode)
+  else
+    return io.open(fn, mode)
+  end
+end
+
+function fs_read(fn)
+  if(isLiskelOS) then
+    return fs.readfile(fn)
+  else
+    return fn:read()
+  end
+end
+
+function fs_write(fn, data)
+  if(isLiskelOS) then
+    return fs.write(fn, data)
+  else
+    return fn:write(data)
+  end
+end
+
+function fs_close(fn)
+  if(not isLiskelOS) then
+    fn:close()
+  end
+end
+
 -------------------- ORDERED DICTS --------------------
 
 local dicts = {}
@@ -311,11 +343,11 @@ end
 function saveObject(dir, filename, object)
   log('saveObject '..filename)
   local fn = dir..filename
-  local file = io.open(fn, "w")
+  local file = fs_open(fn, "w")
   local res = serialization.serialize(object)
   -- res = data.deflate(res)
-  file:write(res)
-  file:close() 
+  fs_write(file, res)
+  fs_close(file) 
   log('saveObject '..filename..' done')
 end
 
@@ -325,9 +357,9 @@ function loadObject(dir, filename)
   if(not fs.exists(fn)) then
     return nil
   end
-  local file = io.open(fn, "r")
-  local res = file:read()
-  file:close()
+  local file = fs_open(fn, "r")
+  local res = fs_read(file)
+  fs_close(file)
   -- res = data.inflate(res)
   res = serialization.unserialize(res)
   log('loadObject '..filename..' done')
