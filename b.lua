@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.8'
+local version = '2.0.9'
 
 local require_raw, require_
 -- local component
@@ -80,8 +80,8 @@ local current_user = nil
 local operator_nick = nil
 -------------------- COMMON --------------------
 
-function beep(freq)
-  computer.beep(freq)
+function beep(freq, length)
+  computer.beep(freq, length)
 end
 
 function pause() 
@@ -893,10 +893,15 @@ function Init()
     end
   end
 
+  beep(500)
+  beep(700)
+  beep(600)
+  beep(800, 0.3)
   -- FIXME clear it one way or other!
   -- term.clear()
   print('================================================')
   print('АРМ "Банк", вер.'..version)
+  
 end
 
 function showHelp() 
