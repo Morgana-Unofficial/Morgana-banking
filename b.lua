@@ -390,7 +390,8 @@ end
 function newUser(username)
   local user
   if(not username) then
-    user = newUserRaw(readStr("Имя пользователя"))
+    local t = readStr("Имя пользователя")
+    user = newUserRaw(t)
   else
     user = newUserRaw(username)
   end
