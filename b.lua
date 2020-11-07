@@ -802,10 +802,57 @@ function saveVexel(vexelObj)
   saveObject(dir.vexels, vexelObj.id, vexelObj)
 end
 
+-------------------- SELF-UPDATE --------------------
+
+function update_from_internet()
+  local url = "https://github.com/RollingHog/Morgana-banking/blob/main/b.lua"
+
+  -- it may be liskelOS
+  local dest_file = '/b.lua'
+  
+  if(not component.filesystem.exists(dest_file)) then
+    -- definetely NOT liskelOS
+    dest_file = os.getenv("PWD")..dest_file
+  end
+  
+  local inet = component.getPrimary('internet')
+  if(inet == nil) then
+    print('Недоступна интернет-карта')
+    return false
+  end
+
+  local FILE = fs_open(dest_file, "wb")
+  local result, response = pcall(inet.request, url)
+  if result then
+    local result, reason = pcall(function()
+      for chunk in response do
+        fs_write(FILE, chunk)
+      end
+    end)
+    
+    if not result then
+      print("HTTP request failed: " .. reason .. "\n")
+      return false
+    end
+    
+    io.write("Обновление выполнено")
+    fs_close(FILE)
+    
+    if(readPlusMinus("Перезагрузиться?")) then
+      computer.shutdown(true)
+    end
+
+  else -- no result
+    print("HTTP request failed: " .. response .. "\n")
+    return false
+  end
+end
+
 -------------------- _ --------------------
 createOrderedDict('prog_options', {
   ["-"] = "Выход"
   , ["П"] = "Регистрация пользователя"
+  , ["+"] = "Обновить программу (требуется Интернет-карта)"
   -- , ["С+"] = "Внести деньги на счёт"
   , ["В"] = "Открыть вклад"
   -- , ["Э"] = "Эмитировать (отпечатать) вексели Банка"
@@ -846,6 +893,8 @@ function mainCycle()
       newUser() 
     elseif(cmdkey=="В") then
       newDeposit() 
+    elseif(cmdkey=="+") then
+      update_from_internet() 
     else
       showHelp()
     end
