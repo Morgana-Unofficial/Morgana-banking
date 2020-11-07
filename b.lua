@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.13'
+local version = '2.0.14'
 
 local require_raw, require_
 -- local component
@@ -876,7 +876,7 @@ end
 createOrderedDict('prog_options', {
   ["-"] = "Выход"
   , ["П"] = "Регистрация пользователя"
-  , ["+"] = "Обновить программу (требуется Интернет-карта)"
+  , ["+"] = "Загрузить обновления для программы"
   -- , ["С+"] = "Внести деньги на счёт"
   , ["В"] = "Открыть вклад"
   -- , ["Э"] = "Эмитировать (отпечатать) вексели Банка"
@@ -913,7 +913,8 @@ function Init()
   print("LiskelOS: "..tostring(isLiskelOS))
   
   if (tonumber(free_disk) < 5) then
-    print("На диске слишком мало свободного места, очистите диск")
+    print("На диске слишком мало свободного места")
+    print('Очистите диск')
     pause()
     os.exit()
   end
