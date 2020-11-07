@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.0'
+local version = '2.0.1'
 
 local require_raw, require_
 -- local component
@@ -805,7 +805,7 @@ end
 -------------------- SELF-UPDATE --------------------
 
 function update_from_internet()
-  local url = "https://github.com/RollingHog/Morgana-banking/blob/main/b.lua"
+  local url = "https://raw.githubusercontent.com/RollingHog/Morgana-banking/main/b.lua"
 
   -- it may be liskelOS
   local dest_file = '/b.lua'
@@ -815,6 +815,8 @@ function update_from_internet()
     dest_file = os.getenv("PWD")..dest_file
   end
   
+  print('updating: '..dest_file)
+  
   local inet = component.getPrimary('internet')
   if(inet == nil) then
     print('Недоступна интернет-карта')
@@ -822,6 +824,7 @@ function update_from_internet()
   end
 
   local FILE = fs_open(dest_file, "wb")
+  
   local result, response = pcall(inet.request, url)
   if result then
     local result, reason = pcall(function()
