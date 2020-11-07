@@ -320,8 +320,12 @@ function readFromDict(nDictName, prompt, default)
   local res
   if(dicts[nDictName][c1]==nil)then
     local c2, _ = readKey()
-    cq = c1..c2
-    res = dicts[nDictName][cq]
+    if(c2 == nil) then
+      res = nil
+    else
+      cq = c1..c2
+      res = dicts[nDictName][cq]
+    end
   else
     res = dicts[nDictName][c1]
     cq = c1
