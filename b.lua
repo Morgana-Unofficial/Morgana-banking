@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.5'
+local version = '2.0.6'
 
 local require_raw, require_
 -- local component
@@ -53,9 +53,9 @@ if(not disk_drive) then
   print("Нет дисковода")
 end
 
-local inet_test = false
-pcall(function () inet_test = component.internet end)
-if(not inet_test) then
+local inet_aval = false
+pcall(function () inet_aval = component.internet end)
+if(not inet_aval) then
   print("Нет интернет-карты")
 end
 
@@ -812,6 +812,11 @@ end
 -------------------- SELF-UPDATE --------------------
 
 function update_from_internet()
+
+  if(not inet_aval) then
+    print("Нет интернет-карты, обновление невозможно")
+    return
+  end
 
   local url = "https://raw.githubusercontent.com/RollingHog/Morgana-banking/main/b.lua"
 
