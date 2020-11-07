@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.1'
+local version = '2.0.2'
 
 local require_raw, require_
 -- local component
@@ -828,14 +828,16 @@ function update_from_internet()
     return false
   end
 
-  local FILE = fs_open(dest_file, "wb")
+  local FILE = fs_open(dest_file, "w")
+  fs_close(FILE)
   
   local result, response = pcall(inet.request, url)
   if result then
     local result, reason = pcall(function()
       for chunk in response do
-        print(chunk)
+        FILE = fs_open(dest_file, "a")
         fs_write(FILE, chunk)
+        fs_close(FILE)
       end
     end)
     
