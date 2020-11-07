@@ -20,6 +20,7 @@ if(isLiskelOS) then
   fs = f
 else 
   -- OpenOS
+  read = io.read
   component = require("component")
   computer = require("computer")
   unicode = require("unicode")
@@ -144,7 +145,7 @@ end
 function getFloppyPath()
   if (disk_drive.isEmpty()) then
     print('Вставьте диск и нажмите "Продолжить"')
-    io.read()
+    pause()
   end
   local floppy_id = disk_drive.media()
   local floppy_path = '/mnt/'..string.sub(floppy_id, 1, 3)..'/'
@@ -203,8 +204,8 @@ function readPlusMinus(prompt)
 end
 
 function readStr(prompt, default)
-  io.write(prompt..": ")
-  local t = io.read()
+  print(prompt..": ")
+  local t = read()
   if (not t) then
     error("readStr interruption")
   end
