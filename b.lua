@@ -1,14 +1,26 @@
 -- b for "bank"
 local version = '1.1.7'
 
-local component = require("component")
-local computer = require("computer")
-local fs = require("filesystem")
-local shell = require("shell")
-local term = require("term")
-local event = require("event")
-local serialization = require("serialization")
-local unicode = require("unicode")
+local require_raw, require_
+local component
+    , computer
+    , unicode
+    , fs
+
+if(_osname == 'Liskel OS') then
+  require_ = function(s) return f.run('/lib/'..s) end
+  fs = f
+else 
+  -- OpenOS
+  component = require("component")
+  computer = require("computer")
+  unicode = require("unicode")
+  fs = require("filesystem")
+  require_ = require
+end
+
+local event = require_("event")
+local serialization = require_("serialization")
 
 -- component aliases 
 local prn = false
@@ -676,7 +688,8 @@ function Init()
     end
   end
 
-  term.clear()
+  -- FIXME clear it one way or other!
+  -- term.clear()
   print('АРМ "Банк", вер.'..version)
 end
 
