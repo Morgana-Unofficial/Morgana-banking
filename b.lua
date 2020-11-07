@@ -136,6 +136,7 @@ function readOneliner(filename, default)
 end
 
 function writeOneliner(filename, nData)
+  log('writeOneliner '..filename)
   local fn = root..filename
   local file = fs_open(fn, "w")
   fs_write(file, nData)
