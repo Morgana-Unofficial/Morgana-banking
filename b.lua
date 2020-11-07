@@ -372,7 +372,7 @@ function readFromDict(nDictName, prompt, default)
   local res
   if(dicts[nDictName][c1]==nil)then
     local c2, _ = readKey()
-    if(c2 == nil) then
+    if(c2 == nil or c2 == false) then
       res = nil
     else
       cq = c1..c2
