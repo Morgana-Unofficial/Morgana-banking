@@ -1,5 +1,5 @@
 -- b for "bank"
-local version = '2.0.3'
+local version = '2.0.4'
 
 local require_raw, require_
 -- local component
@@ -805,11 +805,6 @@ end
 -------------------- SELF-UPDATE --------------------
 
 function update_from_internet()
-
-  if(isLiskelOS) then
-    print("Недоступно для LiskelOS")
-    return
-  end
 
   local url = "https://raw.githubusercontent.com/RollingHog/Morgana-banking/main/b.lua"
 
