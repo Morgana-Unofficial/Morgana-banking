@@ -129,14 +129,6 @@ function readLiskelStr()
         end
       elseif evt[4] == 46 and evt[3] == 3 then -- Ctrl+C
         return nil
-      -- elseif evt[4] == 203 then -- left key
-        -- inp.MovePos(-1)
-      -- elseif evt[4] == 205 then --  right key
-        -- inp.MovePos(1)
-      -- elseif evt[4] == 199 then -- home
-        -- inp.MovePos(-99999)
-      -- elseif evt[4] == 207 then -- end
-        -- inp.MovePos(99999)
       elseif evt[4] ~= 0 then -- printable keys
         local char = unicode.char(evt[3])
         inp.Insert(char)
